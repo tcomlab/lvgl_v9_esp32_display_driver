@@ -1,3 +1,7 @@
+/*
+    Esample for use driver
+
+*/
 
 
 #include <stdio.h>
@@ -43,30 +47,16 @@ void build_gui(void)
 }
 
 
-void hello_task(void *pvParameter)
-{
-	while(1)
-	{
-	    lv_tick_inc(LV_TICK_PERIOD_MS);
-        lv_task_handler();
-	    vTaskDelay(10 / portTICK_PERIOD_MS);
-	}
-}
-
-
 void app_main(void)
 {
     gpio_reset_pin(GPIO_NUM_22);
     gpio_set_direction(GPIO_NUM_22, GPIO_MODE_OUTPUT);
 
-
     lvgl_driver_init();
 
     lv_init();
 
-    //xTaskCreate(&hello_task, "hello_task", 2048, NULL, 5, NULL);
-
-    lv_display_t *display = lv_display_create(MY_DISP_HOR_RES, MY_DISP_VER_RES);//= lv_st7789_create(MY_DISP_HOR_RES, MY_DISP_VER_RES, 0,my_lcd_send_cmd, my_lcd_send_color);
+    lv_display_t *display = lv_display_create(MY_DISP_HOR_RES, MY_DISP_VER_RES);
     lv_display_set_rotation(display, LV_DISPLAY_ROTATION_0);
 
     /* Allocate draw buffers on the heap. In this example we use two partial buffers of 1/10th size of the screen */
@@ -91,14 +81,11 @@ void app_main(void)
 
     lv_display_set_flush_cb(display, disp_driver_flush);
 
-    //test_dsp();
-
     build_gui();
 
     while(1){
         lv_tick_inc(LV_TICK_PERIOD_MS);
         lv_task_handler();
-        //vTaskDelay(1 / portTICK_PERIOD_MS);
     }
 
 }
