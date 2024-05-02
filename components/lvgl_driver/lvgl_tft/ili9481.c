@@ -46,7 +46,23 @@ static void ili9481_send_color(void * data, uint16_t length);
 /**********************
  *      MACROS
  **********************/
-
+typedef union
+{
+    struct
+    {
+#if LV_COLOR_16_SWAP == 0
+        uint16_t blue : 5;
+        uint16_t green : 6;
+        uint16_t red : 5;
+#else
+        uint16_t green_h : 3;
+        uint16_t red : 5;
+        uint16_t blue : 5;
+        uint16_t green_l : 3;
+#endif
+    } ch;
+    uint16_t full;
+} lv_color16_2_t;
 /**********************
  *   GLOBAL FUNCTIONS
  **********************/
@@ -74,9 +90,9 @@ void ili9481_init(void)
     };
 
     //Initialize non-SPI GPIOs
-    gpio_pad_select_gpio(ILI9481_DC);
+    gpio_reset_pin(ILI9481_DC);
     gpio_set_direction(ILI9481_DC, GPIO_MODE_OUTPUT);
-    gpio_pad_select_gpio(ILI9481_RST);
+    gpio_reset_pin(ILI9481_RST);
     gpio_set_direction(ILI9481_RST, GPIO_MODE_OUTPUT);
 
 #if ILI9481_ENABLE_BACKLIGHT_CONTROL
@@ -86,15 +102,15 @@ void ili9481_init(void)
 
     //Reset the display
     gpio_set_level(ILI9481_RST, 0);
-    vTaskDelay(100 / portTICK_RATE_MS);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
     gpio_set_level(ILI9481_RST, 1);
-    vTaskDelay(100 / portTICK_RATE_MS);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
 
     ESP_LOGI(TAG, "ILI9481 initialization.");
 
     // Exit sleep
     ili9481_send_cmd(0x01);	/* Software reset */
-    vTaskDelay(100 / portTICK_RATE_MS);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
 
     //Send all the commands
     uint16_t cmd = 0;
@@ -102,7 +118,7 @@ void ili9481_init(void)
         ili9481_send_cmd(ili_init_cmds[cmd].cmd);
         ili9481_send_data(ili_init_cmds[cmd].data, ili_init_cmds[cmd].databytes&0x1F);
         if (ili_init_cmds[cmd].databytes & 0x80) {
-            vTaskDelay(100 / portTICK_RATE_MS);
+            vTaskDelay(100 / portTICK_PERIOD_MS);
         }
         cmd++;
     }
@@ -112,12 +128,14 @@ void ili9481_init(void)
     ili9481_set_orientation(ILI9481_DISPLAY_ORIENTATION);
 }
 
+
+
 // Flush function based on mvturnho repo
-void ili9481_flush(lv_display_t * drv, const lv_area_t * area, lv_color_t * color_map)
+void ili9481_flush(lv_display_t  * drv, const lv_area_t * area, uint8_t * color_map)
 {
     uint32_t size = lv_area_get_width(area) * lv_area_get_height(area);
 
-    lv_color16_t *buffer_16bit = (lv_color16_t *) color_map;
+    lv_color16_2_t *buffer_16bit = (uint8_t *) color_map;
     uint8_t *mybuf;
     do {
         mybuf = (uint8_t *) heap_caps_malloc(3 * size * sizeof(uint8_t), MALLOC_CAP_DMA);
@@ -129,6 +147,7 @@ void ili9481_flush(lv_display_t * drv, const lv_area_t * area, lv_color_t * colo
 
     for (uint32_t i = 0; i < size; i++) {
         LD = buffer_16bit[i].full;
+        ////TODO: Add 
         mybuf[j] = (uint8_t) (((LD & 0xF800) >> 8) | ((LD & 0x8000) >> 13));
         j++;
         mybuf[j] = (uint8_t) ((LD & 0x07E0) >> 3);
@@ -163,7 +182,10 @@ void ili9481_flush(lv_display_t * drv, const lv_area_t * area, lv_color_t * colo
 
     /*Memory write*/
     ili9481_send_cmd(ILI9481_CMD_MEMORY_WRITE);
-
+    
+#ifdef CONFIG_LV_SWAP_COLORS
+	 lv_draw_sw_rgb565_swap(mybuf, size);
+#endif
     ili9481_send_color((void *) mybuf, size * 3);
     heap_caps_free(mybuf);
 }

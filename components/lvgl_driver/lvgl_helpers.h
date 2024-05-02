@@ -35,7 +35,7 @@ extern "C" {
  * so the buffer size can be divided by 8, e.g. see SSD1306 display size. */
 
 // TODO Move to setting
-#define LV_HOR_RES_MAX 340
+#define LV_HOR_RES_MAX CONFIG_LV_HOR_RES_MAX
 
 
 #if defined (CONFIG_CUSTOM_DISPLAY_BUFFER_SIZE)

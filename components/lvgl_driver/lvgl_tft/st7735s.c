@@ -97,16 +97,16 @@ void st7735s_init(void)
     };
 
 	//Initialize non-SPI GPIOs
-        gpio_pad_select_gpio(ST7735S_DC);
+    gpio_reset_pin(ST7735S_DC);
 	gpio_set_direction(ST7735S_DC, GPIO_MODE_OUTPUT);
-        gpio_pad_select_gpio(ST7735S_RST);
+	gpio_reset_pin(ST7735S_RST);
 	gpio_set_direction(ST7735S_RST, GPIO_MODE_OUTPUT);
 
 	//Reset the display
 	gpio_set_level(ST7735S_RST, 0);
-	vTaskDelay(100 / portTICK_RATE_MS);
+	vTaskDelay(100 / portTICK_PERIOD_MS);
 	gpio_set_level(ST7735S_RST, 1);
-	vTaskDelay(100 / portTICK_RATE_MS);
+	vTaskDelay(100 / portTICK_PERIOD_MS);
 
 	ESP_LOGI(TAG, "ST7735S initialization.");
 
@@ -116,7 +116,7 @@ void st7735s_init(void)
 		st7735s_send_cmd(init_cmds[cmd].cmd);
 		st7735s_send_data(init_cmds[cmd].data, init_cmds[cmd].databytes&0x1F);
 		if (init_cmds[cmd].databytes & 0x80) {
-			vTaskDelay(100 / portTICK_RATE_MS);
+			vTaskDelay(100 / portTICK_PERIOD_MS);
 		}
 		cmd++;
 	}
@@ -130,7 +130,7 @@ void st7735s_init(void)
     st7735s_set_orientation(CONFIG_LV_DISPLAY_ORIENTATION);
 }
 
-void st7735s_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * color_map)
+void st7735s_flush(lv_display_t  * drv, const lv_area_t * area, uint8_t * color_map)
 {
 	uint8_t data[4];
 
@@ -154,6 +154,9 @@ void st7735s_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * col
 	st7735s_send_cmd(0x2C);
 
 	uint32_t size = lv_area_get_width(area) * lv_area_get_height(area);
+#ifdef CONFIG_LV_SWAP_COLORS
+	 lv_draw_sw_rgb565_swap(color_map, size);
+#endif
 	st7735s_send_color((void*)color_map, size * 2);
 }
 

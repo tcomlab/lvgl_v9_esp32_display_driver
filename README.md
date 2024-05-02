@@ -5,13 +5,34 @@
 
 This is forf from lvgl/lvgl_esp32_drivers
 
+Adapting Controller list
+
+| Display Controller                          | Type       | Interface              | Color depth (LV_COLOR_DEPTH) | Swap RGB565   |  Status   |
+|---------------------------------------------|------------|------------------------|------------------------------|---------------|-----------|
+| ILI9341                                     | TFT        | SPI                    | 16: RGB565                   | Yes           | Work      |
+| ILI9486                                     | TFT        | SPI                    | 16: RGB565                   | Yes           |InProgress |
+| ILI9488                                     | TFT        | SPI                    | 16: RGB565                   | No            |InProgress |
+| HX8357B/HX8357D                             | TFT        | SPI                    | 16: RGB565                   | Yes           |InProgress | 
+| ST7789                                      | TFT        | SPI                    | 16: RGB565                   | Yes           | Work      |
+| ST7735S                                     | TFT        | SPI                    | 16: RGB565                   | Yes           |InProgress |
+| FT81x                                       | TFT        | Single, Dual, Quad SPI | 16: RGB565                   | No            |InProgress |
+| GC9A01                                      | TFT        | SPI                    | 16: RGB565                   | Yes           | Work      |
+| RA8875                                      | TFT        | SPI                    | 16: RGB565                   | Yes           |Not Tested |     |
+| SH1107                                      | Monochrome | SPI                    | 1: 1byte per pixel           | No            |InProgress |
+| SSD1306                                     | Monochrome | I2C                    | 1: 1byte per pixel           | No            |InProgress |
+| IL3820                                      | e-Paper    | SPI                    | 1: 1byte per pixel           | No            |InProgress |
+| UC8151D/ GoodDisplay GDEW0154M10 DES        | e-Paper    | SPI                    | 1: 1byte per pixel           | No            |InProgress |
+| FitiPower JD79653A/ GoodDisplay GDEW0154M09 | e-Paper    | SPI                    | 1: 1byte per pixel           | No            |InProgress |
+
+
+
 #### Table of content
 - [Supported display controllers](#supported-display-controllers)
 - [Supported indev controllers](#supported-indev-controllers)
 - [Support for predefined development kits](#support-for-predefined-development-kits)
 
 **NOTE:** You need to set the display horizontal and vertical size, color depth and
-swap of RGB565 color on the LVGL configuration menuconfig (it's not handled automatically).
+swap of RGB565 color on the LVGL configuration menuconfig 
 
 
 ## Supported display controllers
@@ -67,3 +88,5 @@ and sets the gpio numbers for the interface.
 **NOTE:** See [Supported display controllers](#supported-display-controllers) for more information on display configuration.
 **NOTE:** See [Supported indev controllers](#supported-indev-controllers) for more information about indev configuration.
 
+## TODO:
+[X]  Add swap color in to menuconfig 02.05.24

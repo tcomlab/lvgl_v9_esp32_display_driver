@@ -76,9 +76,9 @@ void ili9486_init(void)
 #endif
 
 	//Initialize non-SPI GPIOs
-        gpio_pad_select_gpio(ILI9486_DC);
+    gpio_reset_pin(ILI9486_DC);
 	gpio_set_direction(ILI9486_DC, GPIO_MODE_OUTPUT);
-        gpio_pad_select_gpio(ILI9486_RST);
+    gpio_reset_pin(ILI9486_RST);
 	gpio_set_direction(ILI9486_RST, GPIO_MODE_OUTPUT);
 
 #if ILI9486_ENABLE_BACKLIGHT_CONTROL
@@ -88,9 +88,9 @@ void ili9486_init(void)
 
 	//Reset the display
 	gpio_set_level(ILI9486_RST, 0);
-	vTaskDelay(100 / portTICK_RATE_MS);
+	vTaskDelay(100 / portTICK_PERIOD_MS);
 	gpio_set_level(ILI9486_RST, 1);
-	vTaskDelay(100 / portTICK_RATE_MS);
+	vTaskDelay(100 / portTICK_PERIOD_MS);
 
 	ESP_LOGI(TAG, "ILI9486 Initialization.");
 
@@ -100,7 +100,7 @@ void ili9486_init(void)
 		ili9486_send_cmd(ili_init_cmds[cmd].cmd);
 		ili9486_send_data(ili_init_cmds[cmd].data, ili_init_cmds[cmd].databytes&0x1F);
 		if (ili_init_cmds[cmd].databytes & 0x80) {
-			vTaskDelay(100 / portTICK_RATE_MS);
+			vTaskDelay(100 / portTICK_PERIOD_MS);
 		}
 		cmd++;
 	}
@@ -110,7 +110,7 @@ void ili9486_init(void)
         ili9486_set_orientation(CONFIG_LV_DISPLAY_ORIENTATION);
 }
 
-void ili9486_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * color_map)
+void ili9486_flush(lv_display_t  * drv, const lv_area_t * area, uint8_t * color_map)
 {
 	uint8_t data[4] = {0};
     uint32_t size = 0;
@@ -135,7 +135,9 @@ void ili9486_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * col
 	ili9486_send_cmd(0x2C);
 
 	size = lv_area_get_width(area) * lv_area_get_height(area);
-	
+#ifdef CONFIG_LV_SWAP_COLORS
+	 lv_draw_sw_rgb565_swap(color_map, size);
+#endif
     ili9486_send_color((void*) color_map, size * 2);
 }
 

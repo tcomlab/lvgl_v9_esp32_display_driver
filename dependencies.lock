@@ -4,12 +4,12 @@ dependencies:
     source:
       type: idf
     version: 5.2.1
-  lvgl/lvgl:
-    component_hash: 2a8f619b5c2b1c7ad116c33d43dae8989c76739068f406a7e8ba9221e1085f17
+  lvgl__lvgl:
+    component_hash: null
     source:
-      service_url: https://api.components.espressif.com/
-      type: service
+      path: C:\PROJECT_EMB\lvgl_griver_rep\lvgl_v9_esp32_display_driver\components\lvgl__lvgl
+      type: local
     version: 9.1.0
-manifest_hash: 3c255816a3a0a86eb486250a09c5c32d761e87de66f625ae1f958d939a441d5b
+manifest_hash: d8768697758f3d12d4dce9200c70728be4b3bf1eb758aad455bb4b6a4efa49d4
 target: esp32
 version: 1.0.0

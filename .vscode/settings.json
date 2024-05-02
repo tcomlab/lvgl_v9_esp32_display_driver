@@ -32,7 +32,11 @@
         "lvgl.h": "c",
         "lv_st7789.h": "c",
         "disp_driver.h": "c",
-        "lvgl_helpers.h": "c"
+        "lvgl_helpers.h": "c",
+        "bitset": "c",
+        "format": "c",
+        "initializer_list": "c",
+        "regex": "c"
     },
     "idf.flashType": "UART"
 }

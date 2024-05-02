@@ -92,16 +92,16 @@ void sh1107_init(void)
 	};
 
 	//Initialize non-SPI GPIOs
-        gpio_pad_select_gpio(SH1107_DC);
+	gpio_reset_pin(SH1107_DC);
 	gpio_set_direction(SH1107_DC, GPIO_MODE_OUTPUT);
-        gpio_pad_select_gpio(SH1107_RST);
+    gpio_reset_pin(SH1107_RST);
 	gpio_set_direction(SH1107_RST, GPIO_MODE_OUTPUT);
 
 	//Reset the display
 	gpio_set_level(SH1107_RST, 0);
-	vTaskDelay(100 / portTICK_RATE_MS);
+	vTaskDelay(100 / portTICK_PERIOD_MS);
 	gpio_set_level(SH1107_RST, 1);
-	vTaskDelay(100 / portTICK_RATE_MS);
+	vTaskDelay(100 / portTICK_PERIOD_MS);
 
 	//Send all the commands
 	uint16_t cmd = 0;
@@ -109,36 +109,39 @@ void sh1107_init(void)
 	    sh1107_send_cmd(init_cmds[cmd].cmd);
 	    sh1107_send_data(init_cmds[cmd].data, init_cmds[cmd].databytes&0x1F);
 	    if (init_cmds[cmd].databytes & 0x80) {
-		vTaskDelay(100 / portTICK_RATE_MS);
+		vTaskDelay(100 / portTICK_PERIOD_MS);
 	    }
 	    cmd++;
 	}
 }
 
-void sh1107_set_px_cb(struct _disp_drv_t * disp_drv, uint8_t * buf, lv_coord_t buf_w, lv_coord_t x, lv_coord_t y,
+void sh1107_set_px_cb( lv_display_t  * disp_drv, uint8_t * buf, lv_coord_t buf_w, lv_coord_t x, lv_coord_t y,
         lv_color_t color, lv_opa_t opa)
 {
-	/* buf_w will be ignored, the configured CONFIG_LV_DISPLAY_HEIGHT and _WIDTH,
-	   and CONFIG_LV_DISPLAY_ORIENTATION_LANDSCAPE and _PORTRAIT will be used. */
-    uint16_t byte_index = 0;
-    uint8_t  bit_index = 0;
+	// TODO: Resolve this problem
+// 	/* buf_w will be ignored, the configured CONFIG_LV_DISPLAY_HEIGHT and _WIDTH,
+// 	   and CONFIG_LV_DISPLAY_ORIENTATION_LANDSCAPE and _PORTRAIT will be used. */
+//     uint16_t byte_index = 0;
+//     uint8_t  bit_index = 0;
+	
+// 	lv_color16_2_t color1 = (lv_color16_2_t)*color;
 
-#if defined CONFIG_LV_DISPLAY_ORIENTATION_LANDSCAPE
-	byte_index = y + (( x>>3 ) * LV_VER_RES_MAX);
-	bit_index  = x & 0x7;
-#elif defined CONFIG_LV_DISPLAY_ORIENTATION_PORTRAIT
-    byte_index = x + (( y>>3 ) * LV_HOR_RES_MAX);
-    bit_index  = y & 0x7;
-#endif
+// #if defined CONFIG_LV_DISPLAY_ORIENTATION_LANDSCAPE
+// 	byte_index = y + (( x>>3 ) * LV_VER_RES_MAX);
+// 	bit_index  = x & 0x7;
+// #elif defined CONFIG_LV_DISPLAY_ORIENTATION_PORTRAIT
+//     byte_index = x + (( y>>3 ) * LV_HOR_RES_MAX);
+//     bit_index  = y & 0x7;
+// #endif
 
-    if ((color.full == 0) && (LV_OPA_TRANSP != opa)) {
-        BIT_SET(buf[byte_index], bit_index);
-    } else {
-        BIT_CLEAR(buf[byte_index], bit_index);
-    }
+//     if ((color1.full == 0) && (LV_OPA_TRANSP != opa)) {
+//         BIT_SET(buf[byte_index], bit_index);
+//     } else {
+//         BIT_CLEAR(buf[byte_index], bit_index);
+//     }
 }
 
-void sh1107_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * color_map)
+void sh1107_flush(lv_display_t  * drv, const lv_area_t * area, uint8_t * color_map)
 {
     uint8_t columnLow = area->x1 & 0x0F;
 	uint8_t columnHigh = (area->x1 >> 4) & 0x0F;
@@ -172,7 +175,7 @@ void sh1107_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * colo
     }
 }
 
-void sh1107_rounder(struct _disp_drv_t * disp_drv, lv_area_t *area)
+void sh1107_rounder( lv_display_t   * disp_drv, lv_area_t *area)
 {
     // workaround: always send complete size display buffer
     area->x1 = 0;
