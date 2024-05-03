@@ -5,4 +5,5 @@ set(srcs
 
 idf_component_register(SRCS ${srcs}
                     INCLUDE_DIRS "."
+                    PRIV_REQUIRES ui
 )
